@@ -2,13 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Expenses Claim Management System</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        /* Halang auto-zoom pada iPhone/Android semasa menaip dalam input */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Tingkatkan respon sentuhan pada mobile */
+        button, input, select {
+            touch-action: manipulation;
+        }
+
+        /* Tetapan Khas Cetakan */
         @media print {
             body { background-color: white; margin: 0; padding: 0; }
             .print\:hidden { display: none !important; }
@@ -21,134 +34,137 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-gray-100 p-4 font-sans">
+<body class="min-h-screen bg-gray-100 p-2 sm:p-4 font-sans text-gray-800">
 
     <!-- Control Panel (Hidden during Print) -->
-    <div class="max-w-5xl mx-auto mb-6 bg-white p-4 rounded-lg shadow-md flex justify-between items-center print:hidden">
-        <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <i data-lucide="file-text" class="text-blue-600"></i>
-            Expenses Claim Management System
+    <div class="max-w-5xl mx-auto mb-4 sm:mb-6 bg-white p-3 sm:p-4 rounded-xl shadow-md flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 print:hidden">
+        <h1 class="text-base sm:text-xl font-bold text-gray-800 flex items-center justify-center sm:justify-start gap-2">
+            <i data-lucide="file-text" class="text-blue-600 w-5 h-5 sm:w-6 sm:h-6 shrink-0"></i>
+            <span class="text-center sm:text-left">Expenses Claim System</span>
         </h1>
-        <div class="flex gap-3">
-            <button id="btn-toggle" onclick="toggleMode()" class="flex items-center gap-2 px-4 py-2 rounded font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200">
-                <i data-lucide="file-text" class="w-[18px] h-[18px]"></i> Preview Form
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <button id="btn-toggle" onclick="toggleMode()" class="w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-colors bg-blue-100 text-blue-700 active:bg-blue-200 hover:bg-blue-200 text-sm sm:text-base">
+                <i data-lucide="file-text" class="w-4 h-4 sm:w-[18px] sm:h-[18px]"></i> Preview Form
             </button>
             
-            <button id="btn-print" onclick="window.print()" class="hidden items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors">
-                <i data-lucide="printer" class="w-[18px] h-[18px]"></i> Print / PDF
+            <button id="btn-print" onclick="window.print()" class="hidden w-full sm:w-auto min-h-[44px] items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2.5 sm:py-2 rounded-lg font-medium active:bg-blue-800 hover:bg-blue-700 transition-colors text-sm sm:text-base">
+                <i data-lucide="printer" class="w-4 h-4 sm:w-[18px] sm:h-[18px]"></i> Print / PDF
             </button>
         </div>
     </div>
 
-    <div class="max-w-5xl mx-auto bg-white shadow-xl print:shadow-none print:w-full print:max-w-none">
+    <div class="max-w-5xl mx-auto bg-white rounded-xl sm:rounded-none shadow-xl print:shadow-none print:w-full print:max-w-none overflow-hidden">
         
         <!-- EDIT MODE -->
-        <div id="edit-section" class="p-8 print:hidden">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Data Input Form</h2>
+        <div id="edit-section" class="p-4 sm:p-8 print:hidden">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-800 border-b pb-2">Data Input Form</h2>
 
             <!-- Branding / Logo Settings Section -->
-            <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 class="font-semibold text-lg text-gray-700 mb-3 flex items-center gap-2">
-                    <i data-lucide="image" class="text-blue-600 w-[20px] h-[20px]"></i> Company Branding & Logo Settings
+            <div class="mb-6 sm:mb-8 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-semibold text-base sm:text-lg text-gray-700 mb-3 flex items-center gap-2">
+                    <i data-lucide="image" class="text-blue-600 w-5 h-5"></i> Branding & Logo Settings
                 </h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Company Name</label>
-                        <input type="text" id="inp-comp-name" oninput="updateField('companyName', this.value)" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                        <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Company Name</label>
+                        <input type="text" id="inp-comp-name" oninput="updateField('companyName', this.value)" class="w-full border rounded-lg p-2.5 sm:p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Company Subtitle / Tagline</label>
-                        <input type="text" id="inp-comp-sub" oninput="updateField('companySub', this.value)" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                        <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Company Subtitle / Tagline</label>
+                        <input type="text" id="inp-comp-sub" oninput="updateField('companySub', this.value)" class="w-full border rounded-lg p-2.5 sm:p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm" />
                     </div>
                 </div>
 
                 <div class="mt-4 border-t pt-3">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Logo Option</label>
-                    <div class="flex flex-wrap gap-6 items-center">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="logoType" value="vector" checked onchange="setLogoType('vector')" class="text-blue-600" />
-                            <span class="text-sm text-gray-700 font-medium">Sharp Vector Logo (Glory Asia Flame)</span>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-2">Logo Option</label>
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6">
+                        <label class="flex items-center gap-2 cursor-pointer min-h-[36px]">
+                            <input type="radio" name="logoType" value="vector" checked onchange="setLogoType('vector')" class="w-4 h-4 text-blue-600" />
+                            <span class="text-xs sm:text-sm text-gray-700 font-medium">Sharp Vector Logo (Glory Asia Flame)</span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="logoType" value="custom" onchange="setLogoType('custom')" class="text-blue-600" />
-                            <span class="text-sm text-gray-700 font-medium">Upload Custom Logo File / URL</span>
+                        <label class="flex items-center gap-2 cursor-pointer min-h-[36px]">
+                            <input type="radio" name="logoType" value="custom" onchange="setLogoType('custom')" class="w-4 h-4 text-blue-600" />
+                            <span class="text-xs sm:text-sm text-gray-700 font-medium">Upload Custom Logo File / URL</span>
                         </label>
                     </div>
 
-                    <div id="custom-logo-inputs" class="mt-3 hidden grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div id="custom-logo-inputs" class="mt-3 hidden grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-center">
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Upload Image File (PNG, JPG, SVG)</label>
-                            <input type="file" accept="image/*" onchange="handleLogoUpload(event)" class="w-full text-sm border rounded p-1.5 bg-white cursor-pointer" />
+                            <input type="file" accept="image/*" onchange="handleLogoUpload(event)" class="w-full text-xs sm:text-sm border rounded-lg p-2 bg-white cursor-pointer" />
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Or Paste Image URL</label>
-                            <input type="text" id="inp-logo-url" placeholder="https://example.com/logo.png" oninput="handleLogoUrl(this.value)" class="w-full border rounded p-1.5 text-sm outline-none bg-white" />
+                            <input type="text" id="inp-logo-url" placeholder="https://example.com/logo.png" oninput="handleLogoUrl(this.value)" class="w-full border rounded-lg p-2 text-xs sm:text-sm outline-none bg-white" />
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="space-y-4">
-                    <h3 class="font-semibold text-lg text-gray-700">Employee Information</h3>
+            <!-- Employee & Bank Info Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div class="space-y-3 sm:space-y-4">
+                    <h3 class="font-semibold text-base sm:text-lg text-gray-700">Employee Information</h3>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Employee Name</label>
-                        <input type="text" id="inp-emp-name" oninput="updateEmployeeInfo('name', this.value)" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Employee Name</label>
+                        <input type="text" id="inp-emp-name" oninput="updateEmployeeInfo('name', this.value)" class="w-full border rounded-lg p-2.5 sm:p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Department</label>
-                        <input type="text" id="inp-emp-department" oninput="updateEmployeeInfo('department', this.value)" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Department</label>
+                        <input type="text" id="inp-emp-department" oninput="updateEmployeeInfo('department', this.value)" class="w-full border rounded-lg p-2.5 sm:p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Submission Date</label>
-                        <input type="text" id="inp-emp-submissionDate" oninput="updateEmployeeInfo('submissionDate', this.value)" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Submission Date</label>
+                        <input type="text" id="inp-emp-submissionDate" oninput="updateEmployeeInfo('submissionDate', this.value)" class="w-full border rounded-lg p-2.5 sm:p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <h3 class="font-semibold text-lg text-gray-700">Reimbursement Details</h3>
+                <div class="space-y-3 sm:space-y-4">
+                    <h3 class="font-semibold text-base sm:text-lg text-gray-700">Reimbursement Details</h3>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Bank Name</label>
-                        <input type="text" id="inp-emp-bankName" oninput="updateEmployeeInfo('bankName', this.value)" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Bank Name</label>
+                        <input type="text" id="inp-emp-bankName" oninput="updateEmployeeInfo('bankName', this.value)" class="w-full border rounded-lg p-2.5 sm:p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Account Number</label>
-                        <input type="text" id="inp-emp-accountNumber" oninput="updateEmployeeInfo('accountNumber', this.value)" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Account Number</label>
+                        <input type="text" id="inp-emp-accountNumber" oninput="updateEmployeeInfo('accountNumber', this.value)" class="w-full border rounded-lg p-2.5 sm:p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Employee ID</label>
-                        <input type="text" id="inp-emp-employeeId" oninput="updateEmployeeInfo('employeeId', this.value)" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label class="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Employee ID</label>
+                        <input type="text" id="inp-emp-employeeId" oninput="updateEmployeeInfo('employeeId', this.value)" class="w-full border rounded-lg p-2.5 sm:p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                     </div>
                 </div>
             </div>
 
+            <!-- List of Expenses -->
             <div class="mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-semibold text-lg text-gray-700">List of Expenses</h3>
-                    <button onclick="addExpense()" class="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1 rounded border border-blue-200 hover:bg-blue-100">
-                        <i data-lucide="plus" class="w-[16px] h-[16px]"></i> Add Row
+                <div class="flex justify-between items-center mb-3 sm:mb-4">
+                    <h3 class="font-semibold text-base sm:text-lg text-gray-700">List of Expenses</h3>
+                    <button onclick="addExpense()" class="min-h-[38px] flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg border border-blue-200 active:bg-blue-100 hover:bg-blue-100 font-medium text-xs sm:text-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add Row
                     </button>
                 </div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse">
+                <!-- Horizontal scroll container untuk skrin telefon -->
+                <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <table class="w-full border-collapse min-w-[650px]">
                         <thead>
-                            <tr class="bg-gray-50 text-left text-sm text-gray-600 border-b-2 border-gray-200">
+                            <tr class="bg-gray-50 text-left text-xs sm:text-sm text-gray-600 border-b-2 border-gray-200">
                                 <th class="p-2 w-32">Date</th>
                                 <th class="p-2">Description</th>
                                 <th class="p-2">Purpose</th>
                                 <th class="p-2 w-32">Amount (RM)</th>
-                                <th class="p-2 w-16 text-center">Action</th>
+                                <th class="p-2 w-14 text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="edit-expenses-body">
-                            <!-- Rows akan di render oleh Javascript -->
+                            <!-- Rows akan di-render oleh Javascript -->
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" class="text-right p-2 font-bold text-gray-700">Total Amount (RM):</td>
-                                <td id="edit-total" class="p-2 font-bold text-right text-lg text-blue-700">0.00</td>
+                                <td colspan="3" class="text-right p-2 font-bold text-gray-700 text-sm">Total Amount (RM):</td>
+                                <td id="edit-total" class="p-2 font-bold text-right text-base sm:text-lg text-blue-700">0.00</td>
                                 <td></td>
                             </tr>
                         </tfoot>
@@ -156,116 +172,115 @@
                 </div>
             </div>
             
-            <button onclick="toggleMode(false)" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg">
+            <button onclick="toggleMode(false)" class="w-full min-h-[48px] bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg text-sm sm:text-base mt-4">
                 Save & View Official Form
             </button>
         </div>
 
         <!-- PREVIEW / PRINT MODE -->
-        <div id="preview-section" class="p-10 print:block print:p-0 print:m-0 w-full bg-white hidden">
-            
-            <!-- Header Section -->
-            <div class="flex flex-col items-center mb-8">
-                <div class="flex flex-col items-center justify-center mb-2">
-                    <div id="prev-logo-container" class="mb-1 flex items-center justify-center">
-                        <!-- Logo dipaparkan melalui Javascript -->
+        <div id="preview-section" class="p-4 sm:p-10 print:block print:p-0 print:m-0 w-full bg-white hidden overflow-x-auto">
+            <div class="min-w-[600px] sm:min-w-0">
+                <!-- Header Section -->
+                <div class="flex flex-col items-center mb-6 sm:mb-8">
+                    <div class="flex flex-col items-center justify-center mb-2">
+                        <div id="prev-logo-container" class="mb-1 flex items-center justify-center">
+                            <!-- Logo dipaparkan melalui Javascript -->
+                        </div>
+                        <div class="text-center">
+                            <h2 id="prev-comp-name" class="text-[#1e3a8a] font-bold text-xl leading-tight tracking-wide">GLORY ASIA</h2>
+                            <p id="prev-comp-sub" class="text-[#1e3a8a] text-xs font-semibold tracking-widest uppercase">ENERGY</p>
+                        </div>
                     </div>
-                    <div class="text-center">
-                        <h2 id="prev-comp-name" class="text-[#1e3a8a] font-bold text-xl leading-tight tracking-wide">GLORY ASIA</h2>
-                        <p id="prev-comp-sub" class="text-[#1e3a8a] text-xs font-semibold tracking-widest uppercase">ENERGY</p>
-                    </div>
+                    <h1 class="text-[#1e3a8a] text-base sm:text-lg font-bold underline mt-3 tracking-wide uppercase text-center">OFFICIAL EXPENSES CLAIM FORM</h1>
                 </div>
-                <h1 class="text-[#1e3a8a] text-lg font-bold underline mt-4 tracking-wide uppercase">OFFICIAL EXPENSES CLAIM FORM</h1>
-            </div>
 
-            <!-- Employee Info -->
-            <div class="space-y-3 mb-6 text-sm text-black">
-                <div class="flex gap-2">
-                    <span class="font-bold min-w-[140px]">Employee Name:</span>
-                    <span class="prev-emp-name"></span>
-                </div>
-                <div class="flex gap-2">
-                    <span class="font-bold min-w-[140px]">Department:</span>
-                    <span class="prev-emp-department"></span>
-                </div>
-                <div class="flex gap-2">
-                    <span class="font-bold min-w-[140px]">Date of Submission:</span>
-                    <span class="prev-emp-submissionDate"></span>
-                </div>
-            </div>
-
-            <!-- Table -->
-            <table class="w-full border-collapse border border-black mb-6 text-sm text-black">
-                <thead>
-                    <tr class="bg-white">
-                        <th class="border border-black p-2 font-bold text-left w-[12%]">Date</th>
-                        <th class="border border-black p-2 font-bold text-left w-[40%]">Description</th>
-                        <th class="border border-black p-2 font-bold text-left w-[33%]">Purpose of Expenses</th>
-                        <th class="border border-black p-2 font-bold text-right w-[15%]">Amount<br/>(RM)</th>
-                    </tr>
-                </thead>
-                <tbody id="preview-expenses-body">
-                    <!-- Rows akan di render oleh Javascript -->
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="border border-black p-2 font-bold text-right pr-4">Total Amount:</td>
-                        <td id="preview-total" class="border border-black p-2 font-bold text-right">0.00</td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <!-- Reimbursement Details -->
-            <div class="mb-8 text-sm text-black">
-                <h3 class="font-bold underline mb-3">Reimbursement Details</h3>
-                <div class="space-y-3">
+                <!-- Employee Info -->
+                <div class="space-y-2 sm:space-y-3 mb-6 text-xs sm:text-sm text-black">
                     <div class="flex gap-2">
-                        <span class="font-bold min-w-[140px]">Name:</span>
+                        <span class="font-bold min-w-[140px]">Employee Name:</span>
                         <span class="prev-emp-name"></span>
                     </div>
                     <div class="flex gap-2">
-                        <span class="font-bold min-w-[140px]">Bank:</span>
-                        <span class="prev-emp-bankName"></span>
+                        <span class="font-bold min-w-[140px]">Department:</span>
+                        <span class="prev-emp-department"></span>
                     </div>
                     <div class="flex gap-2">
-                        <span class="font-bold min-w-[140px]">Account Number:</span>
-                        <span class="prev-emp-accountNumber"></span>
+                        <span class="font-bold min-w-[140px]">Date of Submission:</span>
+                        <span class="prev-emp-submissionDate"></span>
                     </div>
-                    <div class="flex gap-2">
-                        <span class="font-bold min-w-[140px]">Employee ID:</span>
-                        <span class="prev-emp-employeeId"></span>
+                </div>
+
+                <!-- Table -->
+                <table class="w-full border-collapse border border-black mb-6 text-xs sm:text-sm text-black">
+                    <thead>
+                        <tr class="bg-white">
+                            <th class="border border-black p-2 font-bold text-left w-[15%] sm:w-[12%]">Date</th>
+                            <th class="border border-black p-2 font-bold text-left w-[38%] sm:w-[40%]">Description</th>
+                            <th class="border border-black p-2 font-bold text-left w-[32%] sm:w-[33%]">Purpose of Expenses</th>
+                            <th class="border border-black p-2 font-bold text-right w-[15%]">Amount<br/>(RM)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="preview-expenses-body">
+                        <!-- Rows akan di-render oleh Javascript -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="border border-black p-2 font-bold text-right pr-4">Total Amount:</td>
+                            <td id="preview-total" class="border border-black p-2 font-bold text-right">0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- Reimbursement Details -->
+                <div class="mb-8 text-xs sm:text-sm text-black">
+                    <h3 class="font-bold underline mb-3">Reimbursement Details</h3>
+                    <div class="space-y-2 sm:space-y-3">
+                        <div class="flex gap-2">
+                            <span class="font-bold min-w-[140px]">Name:</span>
+                            <span class="prev-emp-name"></span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="font-bold min-w-[140px]">Bank:</span>
+                            <span class="prev-emp-bankName"></span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="font-bold min-w-[140px]">Account Number:</span>
+                            <span class="prev-emp-accountNumber"></span>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="font-bold min-w-[140px]">Employee ID:</span>
+                            <span class="prev-emp-employeeId"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signatures -->
+                <div class="mt-8 sm:mt-10 text-xs sm:text-sm text-black pb-10">
+                    <div class="mb-8 sm:mb-10">
+                        <span class="font-bold">Prepared by (Emp): </span>
+                        <span class="prev-emp-name"></span>
+                    </div>
+                    
+                    <div class="flex items-end gap-2 mb-8 sm:mb-10">
+                        <span class="font-bold">Signature: </span>
+                        <div class="border-b border-black w-48 sm:w-64 relative"></div>
+                        <span class="font-bold ml-2 sm:ml-4">Date: </span>
+                        <span class="prev-emp-submissionDate"></span>
+                    </div>
+
+                    <div class="flex items-end gap-2 mt-8 sm:mt-12">
+                        <span class="font-bold">Approved by (Mgr): </span>
+                        <div class="border-b border-black w-48 sm:w-64"></div>
+                        <span class="font-bold ml-2 sm:ml-4">Date: </span>
+                        <div class="border-b border-black w-24 sm:w-32"></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Signatures -->
-            <div class="mt-10 text-sm text-black pb-10">
-                <div class="mb-10">
-                    <span class="font-bold">Prepared by (Emp): </span>
-                    <span class="prev-emp-name"></span>
-                </div>
-                
-                <div class="flex items-end gap-2 mb-10">
-                    <span class="font-bold">Signature: </span>
-                    <div class="border-b border-black w-64 relative"></div>
-                    <span class="font-bold ml-4">Date: </span>
-                    <span class="prev-emp-submissionDate"></span>
-                </div>
-
-                <div class="flex items-end gap-2 mt-12">
-                    <span class="font-bold">Approved by (Mgr): </span>
-                    <div class="border-b border-black w-64"></div>
-                    <span class="font-bold ml-4">Date: </span>
-                    <div class="border-b border-black w-32"></div>
-                </div>
-            </div>
-
         </div>
     </div>
     
     <!-- State and Application Logic -->
     <script>
-        // State Object (React Replacement)
         const state = {
             isEditing: true,
             logoType: 'vector',
@@ -286,13 +301,12 @@
         };
 
         const vectorLogoSVG = `
-            <svg width="64" height="74" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="56" height="66" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M 48,5 C 22,35 12,72 36,102 C 20,86 22,58 40,36 C 45,28 48,5 48,5 Z" fill="#1e3a8a" />
                 <path d="M 48,5 C 48,5 56,25 50,45 C 43,68 48,90 68,106 C 46,106 35,86 42,60 C 46,46 48,5 48,5 Z" fill="#2563eb" />
                 <path d="M 48,25 C 63,42 78,65 70,93 C 63,105 53,109 48,109 C 58,99 66,82 60,65 C 56,52 48,25 48,25 Z" fill="#f97316" />
             </svg>`;
 
-        // Toggle Edit/Preview Mode
         function toggleMode(forceStatus) {
             state.isEditing = forceStatus !== undefined ? forceStatus : !state.isEditing;
             
@@ -306,27 +320,26 @@
                 prevSec.classList.add('hidden');
                 printBtn.style.display = 'none';
                 
-                toggleBtn.className = "flex items-center gap-2 px-4 py-2 rounded font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200";
-                toggleBtn.innerHTML = '<i data-lucide="file-text" class="w-[18px] h-[18px]"></i> Preview Form';
+                toggleBtn.className = "w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-colors bg-blue-100 text-blue-700 active:bg-blue-200 hover:bg-blue-200 text-sm sm:text-base";
+                toggleBtn.innerHTML = '<i data-lucide="file-text" class="w-4 h-4 sm:w-[18px] sm:h-[18px]"></i> Preview Form';
             } else {
                 editSec.classList.add('hidden');
                 prevSec.classList.remove('hidden');
                 printBtn.style.display = 'flex';
                 
-                toggleBtn.className = "flex items-center gap-2 px-4 py-2 rounded font-medium transition-colors bg-green-100 text-green-700 hover:bg-green-200";
-                toggleBtn.innerHTML = '<i data-lucide="edit" class="w-[18px] h-[18px]"></i> Edit Data';
+                toggleBtn.className = "w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg font-medium transition-colors bg-green-100 text-green-700 active:bg-green-200 hover:bg-green-200 text-sm sm:text-base";
+                toggleBtn.innerHTML = '<i data-lucide="edit" class="w-4 h-4 sm:w-[18px] sm:h-[18px]"></i> Edit Data';
             }
             lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Branding Updates
         function updateField(field, value) {
             state[field] = value;
             if(field === 'companyName') document.getElementById('prev-comp-name').innerText = value;
             if(field === 'companySub') document.getElementById('prev-comp-sub').innerText = value;
         }
 
-        // Logo Functions
         function updateLogoView() {
             const logoContainer = document.getElementById('prev-logo-container');
             const customInputs = document.getElementById('custom-logo-inputs');
@@ -337,7 +350,7 @@
                 logoContainer.innerHTML = vectorLogoSVG;
             } else {
                 if (state.customLogoUrl) {
-                    logoContainer.innerHTML = `<img src="${state.customLogoUrl}" alt="Company Logo" class="h-20 object-contain max-w-[220px]" />`;
+                    logoContainer.innerHTML = `<img src="${state.customLogoUrl}" alt="Company Logo" class="h-16 sm:h-20 object-contain max-w-[200px]" />`;
                 } else {
                     logoContainer.innerHTML = vectorLogoSVG;
                 }
@@ -367,14 +380,12 @@
             updateLogoView();
         }
 
-        // Employee Info Updates
         function updateEmployeeInfo(field, value) {
             state.employeeInfo[field] = value;
             const elements = document.querySelectorAll(`.prev-emp-${field}`);
             elements.forEach(el => el.innerText = value);
         }
 
-        // Expenses Render and Update
         function renderEditExpenses() {
             const editBody = document.getElementById('edit-expenses-body');
             editBody.innerHTML = '';
@@ -383,13 +394,13 @@
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-gray-100";
                 tr.innerHTML = `
-                    <td class="p-1"><input type="text" value="${exp.date}" oninput="updateExpense(${exp.id}, 'date', this.value)" class="w-full border p-1 rounded" placeholder="DD/MM/YYYY" /></td>
-                    <td class="p-1"><input type="text" value="${exp.desc}" oninput="updateExpense(${exp.id}, 'desc', this.value)" class="w-full border p-1 rounded" placeholder="Details..." /></td>
-                    <td class="p-1"><input type="text" value="${exp.purpose}" oninput="updateExpense(${exp.id}, 'purpose', this.value)" class="w-full border p-1 rounded" placeholder="Purpose..." /></td>
-                    <td class="p-1"><input type="number" step="0.01" value="${exp.amount}" oninput="updateExpense(${exp.id}, 'amount', this.value)" class="w-full border p-1 rounded text-right" placeholder="0.00" /></td>
+                    <td class="p-1"><input type="text" value="${exp.date}" oninput="updateExpense(${exp.id}, 'date', this.value)" class="w-full border p-2 rounded-lg text-sm" placeholder="DD/MM/YYYY" /></td>
+                    <td class="p-1"><input type="text" value="${exp.desc}" oninput="updateExpense(${exp.id}, 'desc', this.value)" class="w-full border p-2 rounded-lg text-sm" placeholder="Details..." /></td>
+                    <td class="p-1"><input type="text" value="${exp.purpose}" oninput="updateExpense(${exp.id}, 'purpose', this.value)" class="w-full border p-2 rounded-lg text-sm" placeholder="Purpose..." /></td>
+                    <td class="p-1"><input type="number" step="0.01" value="${exp.amount}" oninput="updateExpense(${exp.id}, 'amount', this.value)" class="w-full border p-2 rounded-lg text-right text-sm" placeholder="0.00" /></td>
                     <td class="p-1 text-center">
-                        <button onclick="removeExpense(${exp.id})" class="text-red-500 hover:bg-red-50 p-1 rounded">
-                            <i data-lucide="trash-2" class="w-[18px] h-[18px]"></i>
+                        <button onclick="removeExpense(${exp.id})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg active:bg-red-100">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </td>
                 `;
@@ -444,9 +455,7 @@
             renderPreviewExpenses();
         }
 
-        // Initialize App on Load
         document.addEventListener("DOMContentLoaded", () => {
-            // Populate Static Inputs
             document.getElementById('inp-comp-name').value = state.companyName;
             document.getElementById('inp-comp-sub').value = state.companySub;
             updateField('companyName', state.companyName);
@@ -462,7 +471,6 @@
             renderEditExpenses();
             renderPreviewExpenses();
             
-            // Set Initial Mode to Edit
             toggleMode(true); 
         });
     </script>
