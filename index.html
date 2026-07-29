@@ -1,412 +1,409 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expenses Claim Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <style>
-        @media print {
-            body { background-color: white; margin: 0; padding: 0; }
-            .print-hidden { display: none !important; }
-            .print-block { display: block !important; }
-            .print-shadow-none { box-shadow: none !important; }
-            .print-w-full { width: 100% !important; max-width: none !important; }
-            .print-p-0 { padding: 0 !important; }
-            @page { margin: 1cm; size: A4 portrait; }
-            
-            /* Apply 80% scaling for print */
-            #print-mode {
-                transform: scale(0.8);
-                transform-origin: top left;
-                width: 125%; /* Compensate for the 0.8 scale */
-            }
-        }
-    </style>
-</head>
-<body class="min-h-screen bg-gray-100 p-2 sm:p-4 font-sans text-gray-800">
+import React, { useState, useMemo } from 'react';
+import { Plus, Trash2, Printer, Edit, FileText, Upload, Image as ImageIcon } from 'lucide-react';
 
-    <div class="max-w-5xl mx-auto mb-6 bg-white p-3 sm:p-4 rounded-lg shadow-md flex flex-wrap justify-between items-center print-hidden gap-4">
-        <h1 class="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
-            <i data-lucide="file-text" class="text-blue-600"></i>
-            Expenses
+// Crisp Vector Flame Logo component styled after Glory Asia Energy logo
+const VectorLogo = () => (
+  <svg width="64" height="74" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Left Navy Flame Swoosh */}
+    <path d="M 48,5 C 22,35 12,72 36,102 C 20,86 22,58 40,36 C 45,28 48,5 48,5 Z" fill="#1e3a8a" />
+    {/* Center Blue Flame */}
+    <path d="M 48,5 C 48,5 56,25 50,45 C 43,68 48,90 68,106 C 46,106 35,86 42,60 C 46,46 48,5 48,5 Z" fill="#2563eb" />
+    {/* Right Orange Accent Swoosh */}
+    <path d="M 48,25 C 63,42 78,65 70,93 C 63,105 53,109 48,109 C 58,99 66,82 60,65 C 56,52 48,25 48,25 Z" fill="#f97316" />
+  </svg>
+);
+
+export default function App() {
+  const [isEditing, setIsEditing] = useState(true);
+
+  // Logo & Branding State
+  const [logoType, setLogoType] = useState('vector'); // 'vector' or 'custom'
+  const [customLogoUrl, setCustomLogoUrl] = useState('');
+  const [companyName, setCompanyName] = useState('GLORY ASIA');
+  const [companySub, setCompanySub] = useState('ENERGY');
+
+  // Initial State based on the uploaded image
+  const [employeeInfo, setEmployeeInfo] = useState({
+    name: 'Sajahan Bin Salman Baris',
+    department: 'Operations',
+    submissionDate: '25/06/2026',
+    bankName: 'GX Bank Berhad',
+    accountNumber: '8888-01158324-2',
+    employeeId: 'GAE003',
+  });
+
+  const [expenses, setExpenses] = useState([
+    { id: 1, date: '', desc: '', purpose: '', amount: '' }
+  ]);
+
+  const totalAmount = useMemo(() => {
+    return expenses.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+  }, [expenses]);
+
+  const handleInfoChange = (e) => {
+    const { name, value } = e.target;
+    setEmployeeInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleExpenseChange = (id, field, value) => {
+    setExpenses(prev => prev.map(exp => 
+      exp.id === id ? { ...exp, [field]: value } : exp
+    ));
+  };
+
+  const addExpense = () => {
+    const newId = expenses.length > 0 ? Math.max(...expenses.map(e => e.id)) + 1 : 1;
+    setExpenses([...expenses, { id: newId, date: '', desc: '', purpose: '', amount: '' }]);
+  };
+
+  const removeExpense = (id) => {
+    setExpenses(expenses.filter(exp => exp.id !== id));
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCustomLogoUrl(reader.result);
+        setLogoType('custom');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-4 font-sans">
+      {/* Control Panel (Hidden during Print) */}
+      <div className="max-w-5xl mx-auto mb-6 bg-white p-4 rounded-lg shadow-md flex justify-between items-center print:hidden">
+        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <FileText className="text-blue-600" />
+          Expenses Claim Management System
         </h1>
-        <div class="flex gap-2 sm:gap-3">
-            <button id="toggle-view-btn" onclick="toggleView()" class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200">
-                <i data-lucide="file-text" class="w-5 h-5"></i> <span id="toggle-text">Preview</span>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => setIsEditing(!isEditing)}
+            className={`flex items-center gap-2 px-4 py-2 rounded font-medium transition-colors ${
+              isEditing ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}
+          >
+            {isEditing ? <><FileText size={18} /> Preview Form</> : <><Edit size={18} /> Edit Data</>}
+          </button>
+          
+          {!isEditing && (
+            <button 
+              onClick={handlePrint}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors"
+            >
+              <Printer size={18} /> Print / PDF
             </button>
-            
-            <button id="print-btn" onclick="window.print()" class="hidden items-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded font-medium hover:bg-blue-700 transition-colors">
-                <i data-lucide="printer" class="w-5 h-5"></i> Print
-            </button>
+          )}
         </div>
-    </div>
+      </div>
 
-    <div id="main-container" class="max-w-5xl mx-auto bg-white shadow-xl print-shadow-none print-w-full rounded-lg overflow-hidden">
+      <div className="max-w-5xl mx-auto bg-white shadow-xl print:shadow-none print:w-full print:max-w-none">
         
-        <!-- EDIT MODE -->
-        <div id="edit-mode" class="p-4 sm:p-8 print-hidden">
-            <h2 class="text-xl sm:text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Data Input</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* EDIT MODE */}
+        {isEditing && (
+          <div className="p-8 print:hidden">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Data Input Form</h2>
+
+            {/* Branding / Logo Settings Section */}
+            <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-semibold text-lg text-gray-700 mb-3 flex items-center gap-2">
+                <ImageIcon size={20} className="text-blue-600" /> Company Branding & Logo Settings
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Company Name</label>
+                  <input 
+                    type="text" 
+                    value={companyName} 
+                    onChange={(e) => setCompanyName(e.target.value)} 
+                    className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Company Subtitle / Tagline</label>
+                  <input 
+                    type="text" 
+                    value={companySub} 
+                    onChange={(e) => setCompanySub(e.target.value)} 
+                    className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white" 
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 border-t pt-3">
+                <label className="block text-sm font-medium text-gray-600 mb-2">Logo Option</label>
+                <div className="flex flex-wrap gap-6 items-center">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="logoType" 
+                      value="vector" 
+                      checked={logoType === 'vector'} 
+                      onChange={() => setLogoType('vector')} 
+                      className="text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700 font-medium">Sharp Vector Logo (Glory Asia Flame)</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="logoType" 
+                      value="custom" 
+                      checked={logoType === 'custom'} 
+                      onChange={() => setLogoType('custom')} 
+                      className="text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700 font-medium">Upload Custom Logo File / URL</span>
+                  </label>
+                </div>
+
+                {logoType === 'custom' && (
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Company Name</label>
-                        <input type="text" id="input-company-name" value="GLORY ASIA" oninput="syncText('input-company-name', 'print-company-name')" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Upload Image File (PNG, JPG, SVG)</label>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleLogoUpload} 
+                        className="w-full text-sm border rounded p-1.5 bg-white cursor-pointer"
+                      />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-1">Company Subtitle</label>
-                        <input type="text" id="input-company-sub" value="ENERGY" oninput="syncText('input-company-sub', 'print-company-sub')" class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Or Paste Image URL</label>
+                      <input 
+                        type="text" 
+                        placeholder="https://example.com/logo.png" 
+                        value={customLogoUrl} 
+                        onChange={(e) => setCustomLogoUrl(e.target.value)} 
+                        className="w-full border rounded p-1.5 text-sm outline-none bg-white"
+                      />
                     </div>
-                </div>
-
-                <div class="mt-4 border-t pt-3">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Logo Option</label>
-                    <div class="flex flex-wrap gap-6 items-center">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="logoType" value="vector" checked onchange="updateLogoType('vector')" class="text-blue-600">
-                            <span class="text-sm text-gray-700 font-medium">Vector Logo (Glory Asia)</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="logoType" value="custom" onchange="updateLogoType('custom')" class="text-blue-600">
-                            <span class="text-sm text-gray-700 font-medium">Upload Custom Logo</span>
-                        </label>
-                    </div>
-
-                    <div id="custom-logo-settings" class="hidden mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Upload File (PNG, JPG)</label>
-                            <input type="file" accept="image/*" onchange="handleFileUpload(event)" class="w-full text-sm border rounded p-1.5 bg-white cursor-pointer">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Or Paste Image URL</label>
-                            <input type="text" id="input-logo-url" placeholder="https://..." oninput="handleUrlUpload(this.value)" class="w-full border rounded p-1.5 text-sm outline-none bg-white">
-                        </div>
-                    </div>
-                </div>
+                  </div>
+                )}
+              </div>
             </div>
             
-            <!-- Employee Info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="space-y-4">
-                    <h3 class="font-semibold text-lg text-gray-700">Employee Information</h3>
-                    <div><label class="block text-sm text-gray-600 mb-1">Name</label><input type="text" id="input-emp-name" value="Sajahan Bin Salman Baris" oninput="syncMultipleText('input-emp-name', ['print-emp-name-1', 'print-emp-name-2', 'print-emp-name-3'])" class="w-full border rounded p-3 text-base sm:p-2 sm:text-sm outline-none"></div>
-                    <div><label class="block text-sm text-gray-600 mb-1">Department</label><input type="text" id="input-emp-dept" value="Operations" oninput="syncText('input-emp-dept', 'print-emp-dept')" class="w-full border rounded p-3 text-base sm:p-2 sm:text-sm outline-none"></div>
-                    <div><label class="block text-sm text-gray-600 mb-1">Submission Date</label><input type="text" id="input-emp-date" value="25/06/2026" oninput="syncMultipleText('input-emp-date', ['print-emp-date-1', 'print-emp-date-2'])" class="w-full border rounded p-3 text-base sm:p-2 sm:text-sm outline-none"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-gray-700">Employee Information</h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Employee Name</label>
+                  <input type="text" name="name" value={employeeInfo.name} onChange={handleInfoChange} className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
                 </div>
-                <div class="space-y-4">
-                    <h3 class="font-semibold text-lg text-gray-700">Reimbursement Details</h3>
-                    <div><label class="block text-sm text-gray-600 mb-1">Bank Name</label><input type="text" id="input-emp-bank" value="GX Bank Berhad" oninput="syncText('input-emp-bank', 'print-emp-bank')" class="w-full border rounded p-3 text-base sm:p-2 sm:text-sm outline-none"></div>
-                    <div><label class="block text-sm text-gray-600 mb-1">Account Number</label><input type="text" id="input-emp-acc" value="8888-01158324-2" oninput="syncText('input-emp-acc', 'print-emp-acc')" class="w-full border rounded p-3 text-base sm:p-2 sm:text-sm outline-none"></div>
-                    <div><label class="block text-sm text-gray-600 mb-1">Employee ID</label><input type="text" id="input-emp-id" value="GAE003" oninput="syncText('input-emp-id', 'print-emp-id')" class="w-full border rounded p-3 text-base sm:p-2 sm:text-sm outline-none"></div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Department</label>
+                  <input type="text" name="department" value={employeeInfo.department} onChange={handleInfoChange} className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Submission Date</label>
+                  <input type="text" name="submissionDate" value={employeeInfo.submissionDate} onChange={handleInfoChange} className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-gray-700">Reimbursement Details</h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Bank Name</label>
+                  <input type="text" name="bankName" value={employeeInfo.bankName} onChange={handleInfoChange} className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Account Number</label>
+                  <input type="text" name="accountNumber" value={employeeInfo.accountNumber} onChange={handleInfoChange} className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Employee ID</label>
+                  <input type="text" name="employeeId" value={employeeInfo.employeeId} onChange={handleInfoChange} className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+              </div>
             </div>
 
-            <!-- Expenses -->
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-semibold text-lg text-gray-700">Expenses List</h3>
-                    <button onclick="addExpense()" class="flex items-center gap-1 bg-blue-600 text-white px-4 py-3 sm:px-3 sm:py-1 rounded hover:bg-blue-700 transition-colors">
-                        <i data-lucide="plus" class="w-5 h-5"></i> <span class="hidden sm:inline">Add</span>
-                    </button>
-                </div>
-                
-                <div class="overflow-x-auto pb-4">
-                    <table class="w-full border-collapse min-w-[600px]">
-                        <thead>
-                            <tr class="bg-gray-50 text-left text-sm text-gray-600 border-b-2 border-gray-200">
-                                <th class="p-3 w-32">Date</th>
-                                <th class="p-3">Description</th>
-                                <th class="p-3">Purpose</th>
-                                <th class="p-3 w-32">Amount (RM)</th>
-                                <th class="p-3 w-16 text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="edit-expenses-body">
-                            <!-- Rows rendered by JS -->
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="3" class="text-right p-2 font-bold text-gray-700">Total Amount (RM):</td>
-                                <td class="p-2 font-bold text-right text-lg text-blue-700" id="edit-total-amount">0.00</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-            
-            <button onclick="toggleView()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg">
-                Save & View Official Form
-            </button>
-        </div>
-
-        <div id="print-mode" class="hidden p-10 print-p-0 print-w-full bg-white">
-            
-            <!-- Header -->
-            <div class="flex flex-col items-center mb-8">
-                <div class="flex flex-col items-center justify-center mb-2">
-                   <div id="logo-container" class="mb-1 flex items-center justify-center h-20">
-                       <svg id="vector-logo" width="64" height="74" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                         <path d="M 45,5 C 25,35 15,80 35,115 C 20,95 20,60 40,25 C 42,15 45,5 45,5 Z" fill="#f97316" />
-                         <path d="M 55,5 C 75,35 85,80 65,115 C 80,95 80,60 60,25 C 58,15 55,5 55,5 Z" fill="#1e3a8a" />
-                       </svg>
-                       <img id="custom-image-logo" src="" alt="Logo" class="hidden h-20 object-contain max-w-[220px]">
-                   </div>
-                   <div class="text-center">
-                       <h2 id="print-company-name" class="text-[#1e3a8a] font-bold text-xl leading-tight tracking-wide">GLORY ASIA</h2>
-                       <p id="print-company-sub" class="text-[#1e3a8a] text-xs font-semibold tracking-widest uppercase">ENERGY</p>
-                   </div>
-                </div>
-                <h1 class="text-[#1e3a8a] text-lg font-bold underline mt-4 tracking-wide uppercase">OFFICIAL EXPENSES CLAIM FORM</h1>
-            </div>
-
-            <!-- Employee Info -->
-            <div class="space-y-3 mb-6 text-sm text-black">
-                <div class="flex gap-2"><span class="font-bold min-w-[140px]">Employee Name:</span><span id="print-emp-name-1">Sajahan Bin Salman Baris</span></div>
-                <div class="flex gap-2"><span class="font-bold min-w-[140px]">Department:</span><span id="print-emp-dept">Operations</span></div>
-                <div class="flex gap-2"><span class="font-bold min-w-[140px]">Date of Submission:</span><span id="print-emp-date-1">25/06/2026</span></div>
-            </div>
-
-            <!-- Table -->
-            <table class="w-full border-collapse border border-black mb-6 text-sm text-black">
-                <thead>
-                    <tr class="bg-white">
-                        <th class="border border-black p-2 font-bold text-left w-[12%]">Date</th>
-                        <th class="border border-black p-2 font-bold text-left w-[40%]">Description</th>
-                        <th class="border border-black p-2 font-bold text-left w-[33%]">Purpose of Expenses</th>
-                        <th class="border border-black p-2 font-bold text-left w-[15%]">Amount<br/>(RM)</th>
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold text-lg text-gray-700">List of Expenses</h3>
+                <button onClick={addExpense} className="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1 rounded border border-blue-200 hover:bg-blue-100">
+                  <Plus size={16} /> Add Row
+                </button>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 text-left text-sm text-gray-600 border-b-2 border-gray-200">
+                      <th className="p-2 w-32">Date</th>
+                      <th className="p-2">Description</th>
+                      <th className="p-2">Purpose</th>
+                      <th className="p-2 w-32">Amount (RM)</th>
+                      <th className="p-2 w-16 text-center">Action</th>
                     </tr>
-                </thead>
-                <tbody id="print-expenses-body">
-                    <!-- Rendered by JS -->
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="border border-black p-2 font-bold text-right pr-4">Total Amount:</td>
-                        <td class="border border-black p-2 font-bold" id="print-total-amount">0.00</td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <!-- Reimbursement Details -->
-            <div class="mb-8 text-sm text-black">
-                <h3 class="font-bold underline mb-3">Reimbursement Details</h3>
-                <div class="space-y-3">
-                    <div class="flex gap-2"><span class="font-bold min-w-[140px]">Name:</span><span id="print-emp-name-2">Sajahan Bin Salman Baris</span></div>
-                    <div class="flex gap-2"><span class="font-bold min-w-[140px]">Bank:</span><span id="print-emp-bank">GX Bank Berhad</span></div>
-                    <div class="flex gap-2"><span class="font-bold min-w-[140px]">Account Number:</span><span id="print-emp-acc">8888-01158324-2</span></div>
-                    <div class="flex gap-2"><span class="font-bold min-w-[140px]">Employee ID:</span><span id="print-emp-id">GAE003</span></div>
-                </div>
-            </div>
-
-            <!-- Signatures -->
-            <div class="mt-10 text-sm text-black pb-10">
-                <div class="mb-10"><span class="font-bold">Prepared by (Emp): </span><span id="print-emp-name-3">Sajahan Bin Salman Baris</span></div>
-                <div class="flex items-end gap-2 mb-10">
-                    <span class="font-bold">Signature: </span><div class="border-b border-black w-64 relative"></div>
-                    <span class="font-bold ml-4">Date: </span><span id="print-emp-date-2">25/06/2026</span>
-                </div>
-                <div class="flex items-end gap-2 mt-12">
-                    <span class="font-bold">Approved by (Mgr): </span><div class="border-b border-black w-64"></div>
-                    <span class="font-bold ml-4">Date: </span><div class="border-b border-black w-32"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Initialize Icons
-        lucide.createIcons();
-
-        // State Management
-        let isEditing = true;
-        
-        let expenses = [
-            { id: 1, date: '11/06/2026', desc: 'Jakarta-Bandung-Jakarta Woosh Train (5 pax)', purpose: 'Business Travel Reimbursement', amount: 665.11 },
-            { id: 2, date: '11/06/2026', desc: 'Dinner at Holiday Inn Bandung', purpose: 'Business Travel Reimbursement', amount: 134.69 },
-            { id: 3, date: '25/06/2026', desc: 'Glory Asia Energy Domain (Yearly)', purpose: 'Office Expenses', amount: 350.00 },
-            { id: 4, date: '25/06/2026', desc: 'Glory Asia Energy Email (5 pax/ Yearly)', purpose: 'Office Expenses', amount: 450.00 },
-            { id: 5, date: '25/06/2026', desc: 'Office Poster Printing (4 pcs) & Design/Artwork', purpose: 'Office Supplies', amount: 1900.00 },
-            { id: 6, date: '25/06/2026', desc: 'Company Corporate Shirt (5 pcs)', purpose: 'Office Supplies', amount: 500.00 }
-        ];
-
-        // Core Functions
-        function toggleView() {
-            isEditing = !isEditing;
-            
-            const editMode = document.getElementById('edit-mode');
-            const printMode = document.getElementById('print-mode');
-            const toggleBtn = document.getElementById('toggle-view-btn');
-            const toggleText = document.getElementById('toggle-text');
-            const printBtn = document.getElementById('print-btn');
-
-            if (isEditing) {
-                editMode.classList.remove('hidden');
-                printMode.classList.add('hidden');
-                
-                toggleBtn.classList.replace('bg-green-100', 'bg-blue-100');
-                toggleBtn.classList.replace('text-green-700', 'text-blue-700');
-                toggleBtn.classList.replace('hover:bg-green-200', 'hover:bg-blue-200');
-                toggleBtn.innerHTML = `<i data-lucide="file-text" class="w-5 h-5"></i> <span>Preview Form</span>`;
-                printBtn.classList.add('hidden');
-                printBtn.classList.remove('flex');
-            } else {
-                editMode.classList.add('hidden');
-                printMode.classList.remove('hidden');
-                
-                toggleBtn.classList.replace('bg-blue-100', 'bg-green-100');
-                toggleBtn.classList.replace('text-blue-700', 'text-green-700');
-                toggleBtn.classList.replace('hover:bg-blue-200', 'hover:bg-green-200');
-                toggleBtn.innerHTML = `<i data-lucide="edit" class="w-5 h-5"></i> <span>Edit Data</span>`;
-                printBtn.classList.remove('hidden');
-                printBtn.classList.add('flex');
-            }
-            lucide.createIcons();
-        }
-
-        // Real-time Text Syncing
-        function syncText(inputId, targetId) {
-            document.getElementById(targetId).innerText = document.getElementById(inputId).value;
-        }
-
-        function syncMultipleText(inputId, targetIds) {
-            const val = document.getElementById(inputId).value;
-            targetIds.forEach(id => {
-                document.getElementById(id).innerText = val;
-            });
-        }
-
-        // Logo Management
-        function updateLogoType(type) {
-            const customSettings = document.getElementById('custom-logo-settings');
-            const vectorLogo = document.getElementById('vector-logo');
-            const customImg = document.getElementById('custom-image-logo');
-
-            if (type === 'vector') {
-                customSettings.classList.add('hidden');
-                vectorLogo.classList.remove('hidden');
-                customImg.classList.add('hidden');
-            } else {
-                customSettings.classList.remove('hidden');
-                vectorLogo.classList.add('hidden');
-                customImg.classList.remove('hidden');
-            }
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    document.getElementById('custom-image-logo').src = reader.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function handleUrlUpload(url) {
-            document.getElementById('custom-image-logo').src = url;
-        }
-
-        // Expenses Management
-        function formatMoney(amount) {
-            return parseFloat(amount || 0).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        function renderExpenses() {
-            const editBody = document.getElementById('edit-expenses-body');
-            const printBody = document.getElementById('print-expenses-body');
-            
-            let editHtml = '';
-            let printHtml = '';
-            let total = 0;
-
-            expenses.forEach((exp, index) => {
-                total += parseFloat(exp.amount || 0);
-                
-                // Build Edit Row
-                editHtml += `
-                    <tr class="border-b border-gray-100">
-                        <td class="p-1"><input type="text" value="${exp.date}" oninput="updateExpense(${exp.id}, 'date', this.value)" class="w-full border p-1 rounded" placeholder="DD/MM/YYYY"></td>
-                        <td class="p-1"><input type="text" value="${exp.desc}" oninput="updateExpense(${exp.id}, 'desc', this.value)" class="w-full border p-1 rounded" placeholder="Details..."></td>
-                        <td class="p-1"><input type="text" value="${exp.purpose}" oninput="updateExpense(${exp.id}, 'purpose', this.value)" class="w-full border p-1 rounded" placeholder="Purpose..."></td>
-                        <td class="p-1"><input type="number" step="0.01" value="${exp.amount}" oninput="updateExpense(${exp.id}, 'amount', this.value)" class="w-full border p-1 rounded text-right" placeholder="0.00"></td>
-                        <td class="p-1 text-center">
-                            <button onclick="removeExpense(${exp.id})" class="text-red-500 hover:bg-red-50 p-1 rounded">
-                                <i data-lucide="trash-2" class="w-5 h-5"></i>
-                            </button>
+                  </thead>
+                  <tbody>
+                    {expenses.map((exp) => (
+                      <tr key={exp.id} className="border-b border-gray-100">
+                        <td className="p-1"><input type="text" value={exp.date} onChange={(e) => handleExpenseChange(exp.id, 'date', e.target.value)} className="w-full border p-1 rounded" placeholder="DD/MM/YYYY" /></td>
+                        <td className="p-1"><input type="text" value={exp.desc} onChange={(e) => handleExpenseChange(exp.id, 'desc', e.target.value)} className="w-full border p-1 rounded" placeholder="Details..." /></td>
+                        <td className="p-1"><input type="text" value={exp.purpose} onChange={(e) => handleExpenseChange(exp.id, 'purpose', e.target.value)} className="w-full border p-1 rounded" placeholder="Purpose..." /></td>
+                        <td className="p-1"><input type="number" step="0.01" value={exp.amount} onChange={(e) => handleExpenseChange(exp.id, 'amount', e.target.value)} className="w-full border p-1 rounded text-right" placeholder="0.00" /></td>
+                        <td className="p-1 text-center">
+                          <button onClick={() => removeExpense(exp.id)} className="text-red-500 hover:bg-red-50 p-1 rounded">
+                            <Trash2 size={18} />
+                          </button>
                         </td>
-                    </tr>
-                `;
-
-                // Build Print Row
-                printHtml += `
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
                     <tr>
-                        <td class="border border-black p-2">${exp.date}</td>
-                        <td class="border border-black p-2">${exp.desc}</td>
-                        <td class="border border-black p-2">${exp.purpose}</td>
-                        <td class="border border-black p-2">${exp.amount ? formatMoney(exp.amount) : '0.00'}</td>
+                      <td colSpan="3" className="text-right p-2 font-bold text-gray-700">Total Amount (RM):</td>
+                      <td className="p-2 font-bold text-right text-lg text-blue-700">{totalAmount.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td></td>
                     </tr>
-                `;
-            });
-
-            editBody.innerHTML = editHtml;
-            printBody.innerHTML = printHtml;
+                  </tfoot>
+                </table>
+              </div>
+            </div>
             
-            const totalStr = formatMoney(total);
-            document.getElementById('edit-total-amount').innerText = totalStr;
-            document.getElementById('print-total-amount').innerText = totalStr;
+            <button 
+              onClick={() => setIsEditing(false)}
+              className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+            >
+              Save & View Official Form
+            </button>
+          </div>
+        )}
 
-            lucide.createIcons();
+        {/* PREVIEW / PRINT MODE */}
+        <div className={`${isEditing ? 'hidden' : 'block'} p-4 md:p-8 w-full bg-white`}>
+          
+          {/* Header Section */}
+          <div className="flex flex-col items-center mb-6">
+            <div className="flex flex-col items-center justify-center mb-2">
+               <div className="mb-1 flex items-center justify-center">
+                 {logoType === 'vector' ? (
+                   <VectorLogo />
+                 ) : customLogoUrl ? (
+                   <img src={customLogoUrl} alt="Company Logo" className="h-16 md:h-20 object-contain max-w-[200px] md:max-w-[220px]" />
+                 ) : (
+                   <VectorLogo />
+                 )}
+               </div>
+               <div className="text-center">
+                 <h2 className="text-[#1e3a8a] font-bold text-lg md:text-xl leading-tight tracking-wide">{companyName}</h2>
+                 {companySub && <p className="text-[#1e3a8a] text-[10px] md:text-xs font-semibold tracking-widest uppercase">{companySub}</p>}
+               </div>
+            </div>
+            <h1 className="text-[#1e3a8a] text-sm md:text-lg font-bold underline mt-2 md:mt-4 tracking-wide uppercase">OFFICIAL EXPENSES CLAIM FORM</h1>
+          </div>
+
+          {/* Employee Info */}
+          <div className="space-y-1.5 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm text-black">
+            <div className="flex gap-2">
+              <span className="font-bold min-w-[120px] md:min-w-[140px]">Employee Name:</span>
+              <span>{employeeInfo.name}</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="font-bold min-w-[120px] md:min-w-[140px]">Department:</span>
+              <span>{employeeInfo.department}</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="font-bold min-w-[120px] md:min-w-[140px]">Date of Submission:</span>
+              <span>{employeeInfo.submissionDate}</span>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto mb-4 md:mb-6">
+            <table className="w-full border-collapse border border-black text-[10px] md:text-sm text-black">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-black p-1 md:p-2 font-bold text-left w-[15%]">Date</th>
+                  <th className="border border-black p-1 md:p-2 font-bold text-left w-[35%]">Description</th>
+                  <th className="border border-black p-1 md:p-2 font-bold text-left w-[35%]">Purpose of Expenses</th>
+                  <th className="border border-black p-1 md:p-2 font-bold text-left w-[15%]">Amount<br/>(RM)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((exp, index) => (
+                  <tr key={exp.id}>
+                    <td className="border border-black p-1 md:p-2">{exp.date}</td>
+                    <td className="border border-black p-1 md:p-2">{exp.desc}</td>
+                    <td className="border border-black p-1 md:p-2">{exp.purpose}</td>
+                    <td className="border border-black p-1 md:p-2 text-right">{exp.amount ? parseFloat(exp.amount).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td colSpan="3" className="border border-black p-1 md:p-2 font-bold text-right pr-4">Total Amount:</td>
+                  <td className="border border-black p-1 md:p-2 font-bold text-right">{totalAmount.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Reimbursement Details */}
+          <div className="mb-6 md:mb-8 text-xs md:text-sm text-black">
+            <h3 className="font-bold underline mb-2 md:mb-3">Reimbursement Details</h3>
+            <div className="space-y-1.5 md:space-y-3">
+              <div className="flex gap-2">
+                <span className="font-bold min-w-[120px] md:min-w-[140px]">Name:</span>
+                <span>{employeeInfo.name}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-bold min-w-[120px] md:min-w-[140px]">Bank:</span>
+                <span>{employeeInfo.bankName}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-bold min-w-[120px] md:min-w-[140px]">Account Number:</span>
+                <span>{employeeInfo.accountNumber}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="font-bold min-w-[120px] md:min-w-[140px]">Employee ID:</span>
+                <span>{employeeInfo.employeeId}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Signatures */}
+          <div className="mt-6 md:mt-10 text-xs md:text-sm text-black pb-4 md:pb-10">
+            <div className="mb-6 md:mb-10">
+              <span className="font-bold">Prepared by (Emp): </span>
+              <span>{employeeInfo.name}</span>
+            </div>
+            
+            <div className="flex items-end gap-2 mb-6 md:mb-10 flex-wrap">
+              <span className="font-bold">Signature: </span>
+              <div className="border-b border-black w-48 md:w-64 relative"></div>
+              <span className="font-bold ml-0 md:ml-4">Date: </span>
+              <span>{employeeInfo.submissionDate}</span>
+            </div>
+
+            <div className="flex items-end gap-2 mt-8 md:mt-12 flex-wrap">
+              <span className="font-bold">Approved by (Mgr): </span>
+              <div className="border-b border-black w-48 md:w-64"></div>
+              <span className="font-bold ml-0 md:ml-4">Date: </span>
+              <div className="border-b border-black w-24 md:w-32"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          body { background-color: white; margin: 0; padding: 0; }
+          .print\\:hidden { display: none !important; }
+          @page { margin: 0.33in; size: A4 portrait; }
+          .print-content { padding: 0 !important; }
         }
-
-        function updateExpense(id, field, value) {
-            const index = expenses.findIndex(e => e.id === id);
-            if (index !== -1) {
-                expenses[index][field] = value;
-                updatePrintTableOnly();
-            }
-        }
-
-        function updatePrintTableOnly() {
-             const printBody = document.getElementById('print-expenses-body');
-             let printHtml = '';
-             let total = 0;
-
-             expenses.forEach((exp) => {
-                 total += parseFloat(exp.amount || 0);
-                 printHtml += `
-                    <tr>
-                        <td class="border border-black p-2">${exp.date}</td>
-                        <td class="border border-black p-2">${exp.desc}</td>
-                        <td class="border border-black p-2">${exp.purpose}</td>
-                        <td class="border border-black p-2">${exp.amount ? formatMoney(exp.amount) : '0.00'}</td>
-                    </tr>
-                `;
-             });
-             printBody.innerHTML = printHtml;
-             
-             const totalStr = formatMoney(total);
-             document.getElementById('edit-total-amount').innerText = totalStr;
-             document.getElementById('print-total-amount').innerText = totalStr;
-        }
-
-        function addExpense() {
-            const newId = expenses.length > 0 ? Math.max(...expenses.map(e => e.id)) + 1 : 1;
-            expenses.push({ id: newId, date: '', desc: '', purpose: '', amount: '' });
-            renderExpenses();
-        }
-
-        function removeExpense(id) {
-            expenses = expenses.filter(exp => exp.id !== id);
-            renderExpenses();
-        }
-
-        // Initialize App on load
-        window.onload = () => {
-            renderExpenses();
-        };
-    </script>
-</body>
-</html>
+      `}} />
+    </div>
+  );
+}
