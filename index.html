@@ -282,114 +282,114 @@ export default function App() {
         )}
 
         {/* PREVIEW / PRINT MODE */}
-        <div className={`${isEditing ? 'hidden' : 'block'} p-4 md:p-8 w-full bg-white`}>
+        <div className={`${isEditing ? 'hidden' : 'block'} p-10 print:p-0 print:m-0 w-full bg-white`}>
           
           {/* Header Section */}
-          <div className="flex flex-col items-center mb-6">
+          <div className="flex flex-col items-center mb-8">
             <div className="flex flex-col items-center justify-center mb-2">
                <div className="mb-1 flex items-center justify-center">
                  {logoType === 'vector' ? (
                    <VectorLogo />
                  ) : customLogoUrl ? (
-                   <img src={customLogoUrl} alt="Company Logo" className="h-16 md:h-20 object-contain max-w-[200px] md:max-w-[220px]" />
+                   <img src={customLogoUrl} alt="Company Logo" className="h-20 object-contain max-w-[220px]" />
                  ) : (
                    <VectorLogo />
                  )}
                </div>
                <div className="text-center">
-                 <h2 className="text-[#1e3a8a] font-bold text-lg md:text-xl leading-tight tracking-wide">{companyName}</h2>
-                 {companySub && <p className="text-[#1e3a8a] text-[10px] md:text-xs font-semibold tracking-widest uppercase">{companySub}</p>}
+                 <h2 className="text-[#1e3a8a] font-bold text-xl leading-tight tracking-wide">{companyName}</h2>
+                 {companySub && <p className="text-[#1e3a8a] text-xs font-semibold tracking-widest uppercase">{companySub}</p>}
                </div>
             </div>
-            <h1 className="text-[#1e3a8a] text-sm md:text-lg font-bold underline mt-2 md:mt-4 tracking-wide uppercase">OFFICIAL EXPENSES CLAIM FORM</h1>
+            <h1 className="text-[#1e3a8a] text-lg font-bold underline mt-4 tracking-wide uppercase">OFFICIAL EXPENSES CLAIM FORM</h1>
           </div>
 
           {/* Employee Info */}
-          <div className="space-y-1.5 md:space-y-3 mb-4 md:mb-6 text-xs md:text-sm text-black">
+          <div className="space-y-3 mb-6 text-sm text-black">
             <div className="flex gap-2">
-              <span className="font-bold min-w-[120px] md:min-w-[140px]">Employee Name:</span>
+              <span className="font-bold min-w-[140px]">Employee Name:</span>
               <span>{employeeInfo.name}</span>
             </div>
             <div className="flex gap-2">
-              <span className="font-bold min-w-[120px] md:min-w-[140px]">Department:</span>
+              <span className="font-bold min-w-[140px]">Department:</span>
               <span>{employeeInfo.department}</span>
             </div>
             <div className="flex gap-2">
-              <span className="font-bold min-w-[120px] md:min-w-[140px]">Date of Submission:</span>
+              <span className="font-bold min-w-[140px]">Date of Submission:</span>
               <span>{employeeInfo.submissionDate}</span>
             </div>
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto mb-4 md:mb-6">
-            <table className="w-full border-collapse border border-black text-[10px] md:text-sm text-black">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-black p-1 md:p-2 font-bold text-left w-[15%]">Date</th>
-                  <th className="border border-black p-1 md:p-2 font-bold text-left w-[35%]">Description</th>
-                  <th className="border border-black p-1 md:p-2 font-bold text-left w-[35%]">Purpose of Expenses</th>
-                  <th className="border border-black p-1 md:p-2 font-bold text-left w-[15%]">Amount<br/>(RM)</th>
+          <table className="w-full border-collapse border border-black mb-6 text-sm text-black">
+            <thead>
+              <tr className="bg-white">
+                <th className="border border-black p-2 font-bold text-left w-[12%]">Date</th>
+                <th className="border border-black p-2 font-bold text-left w-[40%]">Description</th>
+                <th className="border border-black p-2 font-bold text-left w-[33%]">Purpose of Expenses</th>
+                <th className="border border-black p-2 font-bold text-left w-[15%]">Amount<br/>(RM)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {expenses.map((exp, index) => (
+                <tr key={exp.id}>
+                  <td className="border border-black p-2">{exp.date}</td>
+                  <td className="border border-black p-2">{exp.desc}</td>
+                  <td className="border border-black p-2">{exp.purpose}</td>
+                  <td className="border border-black p-2">{exp.amount ? parseFloat(exp.amount).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {expenses.map((exp, index) => (
-                  <tr key={exp.id}>
-                    <td className="border border-black p-1 md:p-2">{exp.date}</td>
-                    <td className="border border-black p-1 md:p-2">{exp.desc}</td>
-                    <td className="border border-black p-1 md:p-2">{exp.purpose}</td>
-                    <td className="border border-black p-1 md:p-2 text-right">{exp.amount ? parseFloat(exp.amount).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</td>
-                  </tr>
-                ))}
-                <tr>
-                  <td colSpan="3" className="border border-black p-1 md:p-2 font-bold text-right pr-4">Total Amount:</td>
-                  <td className="border border-black p-1 md:p-2 font-bold text-right">{totalAmount.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              ))}
+              <tr>
+                <td colSpan="3" className="border border-black p-2 font-bold text-right pr-4">Total Amount:</td>
+                <td className="border border-black p-2 font-bold">{totalAmount.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+            </tbody>
+          </table>
 
           {/* Reimbursement Details */}
-          <div className="mb-6 md:mb-8 text-xs md:text-sm text-black">
-            <h3 className="font-bold underline mb-2 md:mb-3">Reimbursement Details</h3>
-            <div className="space-y-1.5 md:space-y-3">
+          <div className="mb-8 text-sm text-black">
+            <h3 className="font-bold underline mb-3">Reimbursement Details</h3>
+            <div className="space-y-3">
               <div className="flex gap-2">
-                <span className="font-bold min-w-[120px] md:min-w-[140px]">Name:</span>
+                <span className="font-bold min-w-[140px]">Name:</span>
                 <span>{employeeInfo.name}</span>
               </div>
               <div className="flex gap-2">
-                <span className="font-bold min-w-[120px] md:min-w-[140px]">Bank:</span>
+                <span className="font-bold min-w-[140px]">Bank:</span>
                 <span>{employeeInfo.bankName}</span>
               </div>
               <div className="flex gap-2">
-                <span className="font-bold min-w-[120px] md:min-w-[140px]">Account Number:</span>
+                <span className="font-bold min-w-[140px]">Account Number:</span>
                 <span>{employeeInfo.accountNumber}</span>
               </div>
               <div className="flex gap-2">
-                <span className="font-bold min-w-[120px] md:min-w-[140px]">Employee ID:</span>
+                <span className="font-bold min-w-[140px]">Employee ID:</span>
                 <span>{employeeInfo.employeeId}</span>
               </div>
             </div>
           </div>
 
           {/* Signatures */}
-          <div className="mt-6 md:mt-10 text-xs md:text-sm text-black pb-4 md:pb-10">
-            <div className="mb-6 md:mb-10">
+          <div className="mt-10 text-sm text-black pb-10">
+            <div className="mb-10">
               <span className="font-bold">Prepared by (Emp): </span>
               <span>{employeeInfo.name}</span>
             </div>
             
-            <div className="flex items-end gap-2 mb-6 md:mb-10 flex-wrap">
+            <div className="flex items-end gap-2 mb-10">
               <span className="font-bold">Signature: </span>
-              <div className="border-b border-black w-48 md:w-64 relative"></div>
-              <span className="font-bold ml-0 md:ml-4">Date: </span>
+              <div className="border-b border-black w-64 relative">
+                 {/* Place for physical signature */}
+              </div>
+              <span className="font-bold ml-4">Date: </span>
               <span>{employeeInfo.submissionDate}</span>
             </div>
 
-            <div className="flex items-end gap-2 mt-8 md:mt-12 flex-wrap">
+            <div className="flex items-end gap-2 mt-12">
               <span className="font-bold">Approved by (Mgr): </span>
-              <div className="border-b border-black w-48 md:w-64"></div>
-              <span className="font-bold ml-0 md:ml-4">Date: </span>
-              <div className="border-b border-black w-24 md:w-32"></div>
+              <div className="border-b border-black w-64"></div>
+              <span className="font-bold ml-4">Date: </span>
+              <div className="border-b border-black w-32"></div>
             </div>
           </div>
 
@@ -400,8 +400,12 @@ export default function App() {
         @media print {
           body { background-color: white; margin: 0; padding: 0; }
           .print\\:hidden { display: none !important; }
-          @page { margin: 0.33in; size: A4 portrait; }
-          .print-content { padding: 0 !important; }
+          .print\\:p-0 { padding: 0 !important; }
+          .print\\:m-0 { margin: 0 !important; }
+          .print\\:shadow-none { box-shadow: none !important; }
+          .print\\:max-w-none { max-width: none !important; }
+          .print\\:w-full { width: 100% !important; }
+          @page { margin: 1cm; size: A4 portrait; }
         }
       `}} />
     </div>
